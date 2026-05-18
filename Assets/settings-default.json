@@ -441,6 +441,7 @@
   "notifications": {
     "enabled": true,
     "enableMarkdown": false,
+    "scale": 1,
     "density": "default",
     "monitors": [],
     "location": "top_right",
@@ -471,6 +472,7 @@
   },
   "osd": {
     "enabled": true,
+    "scale": 1,
     "location": "top_right",
     "autoHideMs": 2000,
     "overlayLayer": true,

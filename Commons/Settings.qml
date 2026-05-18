@@ -671,6 +671,7 @@ Singleton {
     property JsonObject notifications: JsonObject {
       property bool enabled: true
       property bool enableMarkdown: false
+      property real scale: 1.0
       property string density: "default" // "default", "compact"
       property list<string> monitors: [] // holds notifications visibility per monitor
       property string location: "top_right"
@@ -703,6 +704,7 @@ Singleton {
     // on-screen display
     property JsonObject osd: JsonObject {
       property bool enabled: true
+      property real scale: 1.0
       property string location: "top_right"
       property int autoHideMs: 2000
       property bool overlayLayer: true

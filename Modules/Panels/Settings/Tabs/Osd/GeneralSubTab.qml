@@ -14,6 +14,20 @@ ColumnLayout {
   property var addMonitor
   property var removeMonitor
 
+  NValueSlider {
+    Layout.fillWidth: true
+    label: "Scale"
+    description: "Adjust the size of OSD popups only."
+    from: 0.5
+    to: 3
+    stepSize: 0.05
+    showReset: true
+    value: Settings.data.osd.scale || 1
+    defaultValue: Settings.getDefaultValue("osd.scale")
+    onMoved: value => Settings.data.osd.scale = value
+    text: Math.round((Settings.data.osd.scale || 1) * 100) + "%"
+  }
+
   NComboBox {
     label: I18n.tr("common.position")
     description: I18n.tr("panels.osd.location-description")

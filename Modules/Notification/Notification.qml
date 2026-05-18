@@ -103,8 +103,9 @@ Variants {
       readonly property real frameThickness: Settings.data.bar.frameThickness ?? 8
 
       readonly property bool isCompact: Settings.data.notifications.density === "compact"
-      readonly property int notifWidth: Math.round((isCompact ? 320 : 440) * Style.uiScaleRatio)
-      readonly property int shadowPadding: Style.shadowBlurMax + Style.marginL
+      readonly property real notifScale: Math.max(0.8, Settings.data.notifications.scale || 1.0)
+      readonly property int notifWidth: Math.round((isCompact ? 320 : 440) * Style.uiScaleRatio * notifScale)
+      readonly property int shadowPadding: Math.round((Style.shadowBlurMax + Style.marginL) * notifScale)
 
       // Calculate bar and frame offsets for each edge separately
       readonly property int barOffsetTop: {
@@ -142,13 +143,13 @@ Variants {
       anchors.right: isRight
 
       // Margins for PanelWindow - only apply bar offset for the specific edge where the bar is
-      margins.top: isTop ? barOffsetTop - shadowPadding + Style.marginM : 0
+      margins.top: isTop ? barOffsetTop - shadowPadding + Math.round(Style.marginM * notifScale) : 0
       margins.bottom: isBottom ? barOffsetBottom - shadowPadding : 0
-      margins.left: isLeft ? barOffsetLeft - shadowPadding + Style.marginM : 0
-      margins.right: isRight ? barOffsetRight - shadowPadding + Style.marginM : 0
+      margins.left: isLeft ? barOffsetLeft - shadowPadding + Math.round(Style.marginM * notifScale) : 0
+      margins.right: isRight ? barOffsetRight - shadowPadding + Math.round(Style.marginM * notifScale) : 0
 
       implicitWidth: notifWidth + shadowPadding * 2
-      implicitHeight: notificationStack.implicitHeight + Style.marginL
+      implicitHeight: notificationStack.implicitHeight + Math.round(Style.marginL * notifScale)
 
       property var animateConnection: null
 
@@ -196,7 +197,7 @@ Variants {
           horizontalCenter: parent.isCentered ? parent.horizontalCenter : undefined
         }
 
-        spacing: -notifWindow.shadowPadding * 2 + Style.marginM
+        spacing: -notifWindow.shadowPadding * 2 + Math.round(Style.marginM * notifWindow.notifScale)
 
         Behavior on implicitHeight {
           enabled: !Settings.data.general.animationDisabled
@@ -224,7 +225,7 @@ Variants {
             readonly property int slideDistance: 300
 
             Layout.preferredWidth: notifWidth + notifWindow.shadowPadding * 2
-            Layout.preferredHeight: (notifWindow.isCompact ? compactContent.implicitHeight : notificationContent.implicitHeight) + Style.margin2M + notifWindow.shadowPadding * 2
+            Layout.preferredHeight: (notifWindow.isCompact ? compactContent.implicitHeight : notificationContent.implicitHeight) + Math.round(Style.margin2M * notifWindow.notifScale) + notifWindow.shadowPadding * 2
             Layout.maximumHeight: Layout.preferredHeight
 
             // Animation properties
@@ -558,7 +559,7 @@ Variants {
                   anchors.top: parent.top
                   anchors.left: parent.left
                   anchors.right: parent.right
-                  height: 2
+                  height: Math.max(2, Math.round(2 * notifWindow.notifScale))
                   color: "transparent"
 
                   Rectangle {
@@ -605,41 +606,41 @@ Variants {
                 id: notificationContent
                 visible: !notifWindow.isCompact
                 anchors.fill: cardBackground
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
+                anchors.margins: Math.round(Style.marginM * notifWindow.notifScale)
+                spacing: Math.round(Style.marginM * notifWindow.notifScale)
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginL
-                  Layout.leftMargin: Style.marginM
-                  Layout.rightMargin: Style.marginM
-                  Layout.topMargin: Style.marginM
-                  Layout.bottomMargin: Style.marginM
+                  spacing: Math.round(Style.marginL * notifWindow.notifScale)
+                  Layout.leftMargin: Math.round(Style.marginM * notifWindow.notifScale)
+                  Layout.rightMargin: Math.round(Style.marginM * notifWindow.notifScale)
+                  Layout.topMargin: Math.round(Style.marginM * notifWindow.notifScale)
+                  Layout.bottomMargin: Math.round(Style.marginM * notifWindow.notifScale)
 
                   NImageRounded {
-                    Layout.preferredWidth: Math.round(40 * Style.uiScaleRatio)
-                    Layout.preferredHeight: Math.round(40 * Style.uiScaleRatio)
+                    Layout.preferredWidth: Math.round(40 * Style.uiScaleRatio * notifWindow.notifScale)
+                    Layout.preferredHeight: Math.round(40 * Style.uiScaleRatio * notifWindow.notifScale)
                     Layout.alignment: Qt.AlignVCenter
                     radius: Math.min(Style.radiusL, Layout.preferredWidth / 2)
                     imagePath: model.originalImage || ""
                     borderColor: "transparent"
                     borderWidth: 0
                     fallbackIcon: "bell"
-                    fallbackIconSize: 24
+                    fallbackIconSize: Math.round(24 * notifWindow.notifScale)
                   }
 
                   ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Style.marginS
+                    spacing: Math.round(Style.marginS * notifWindow.notifScale)
 
                     // Header with urgency indicator
                     RowLayout {
                       Layout.fillWidth: true
-                      spacing: Style.marginS
+                      spacing: Math.round(Style.marginS * notifWindow.notifScale)
 
                       Rectangle {
-                        Layout.preferredWidth: 6
-                        Layout.preferredHeight: 6
+                        Layout.preferredWidth: Math.max(6, Math.round(6 * notifWindow.notifScale))
+                        Layout.preferredHeight: Math.max(6, Math.round(6 * notifWindow.notifScale))
                         Layout.alignment: Qt.AlignVCenter
                         radius: Style.radiusXS
                         color: model.urgency === 2 ? Color.mError : model.urgency === 0 ? Color.mOnSurface : Color.mPrimary
@@ -647,7 +648,7 @@ Variants {
 
                       NText {
                         text: model.appName || "Unknown App"
-                        pointSize: Style.fontSizeXS
+                        pointSize: Style.fontSizeXS * notifWindow.notifScale
                         font.weight: Style.fontWeightBold
                         color: Color.mSecondary
                       }
@@ -655,7 +656,7 @@ Variants {
                       NText {
                         textFormat: Text.PlainText
                         text: " " + Time.formatRelativeTime(model.timestamp)
-                        pointSize: Style.fontSizeXXS
+                        pointSize: Style.fontSizeXXS * notifWindow.notifScale
                         color: Color.mOnSurfaceVariant
                         Layout.alignment: Qt.AlignBottom
                       }
@@ -667,7 +668,7 @@ Variants {
 
                     NText {
                       text: model.summary || I18n.tr("common.no-summary")
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeM * notifWindow.notifScale
                       font.weight: Style.fontWeightMedium
                       color: Color.mOnSurface
                       textFormat: Text.StyledText
@@ -676,12 +677,12 @@ Variants {
                       elide: Text.ElideRight
                       visible: text.length > 0
                       Layout.fillWidth: true
-                      Layout.rightMargin: Style.marginM
+                      Layout.rightMargin: Math.round(Style.marginM * notifWindow.notifScale)
                     }
 
                     NText {
                       text: model.body || ""
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeM * notifWindow.notifScale
                       color: Color.mOnSurface
                       textFormat: Text.StyledText
                       wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -690,14 +691,14 @@ Variants {
                       elide: Text.ElideRight
                       visible: text.length > 0
                       Layout.fillWidth: true
-                      Layout.rightMargin: Style.marginXL
+                      Layout.rightMargin: Math.round(Style.marginXL * notifWindow.notifScale)
                     }
 
                     // Actions
                     Flow {
                       Layout.fillWidth: true
-                      spacing: Style.marginS
-                      Layout.topMargin: Style.marginM
+                      spacing: Math.round(Style.marginS * notifWindow.notifScale)
+                      Layout.topMargin: Math.round(Style.marginM * notifWindow.notifScale)
                       flow: Flow.LeftToRight
 
                       property string parentNotificationId: notificationId
@@ -723,12 +724,12 @@ Variants {
                             }
                             return actionText;
                           }
-                          fontSize: Style.fontSizeS
+                          fontSize: Style.fontSizeS * notifWindow.notifScale
                           backgroundColor: Color.mPrimary
                           textColor: hovered ? Color.mOnHover : Color.mOnPrimary
                           hoverColor: Color.mHover
                           outlined: false
-                          implicitHeight: 24
+                          implicitHeight: Math.max(24, Math.round(24 * notifWindow.notifScale))
                           onClicked: {
                             card.runAction(actionData.identifier, false);
                           }
@@ -744,11 +745,11 @@ Variants {
                 visible: !notifWindow.isCompact
                 icon: "close"
                 tooltipText: I18n.tr("tooltips.dismiss-notification")
-                baseSize: Style.baseWidgetSize * 0.6
+                baseSize: Style.baseWidgetSize * 0.6 * notifWindow.notifScale
                 anchors.top: cardBackground.top
-                anchors.topMargin: Style.marginXL
+                anchors.topMargin: Math.round(Style.marginXL * notifWindow.notifScale)
                 anchors.right: cardBackground.right
-                anchors.rightMargin: Style.marginXL
+                anchors.rightMargin: Math.round(Style.marginXL * notifWindow.notifScale)
 
                 onClicked: {
                   card.runAction("", true);
@@ -760,28 +761,28 @@ Variants {
                 id: compactContent
                 visible: notifWindow.isCompact
                 anchors.fill: cardBackground
-                anchors.margins: Style.marginM
-                spacing: Style.marginS
+                anchors.margins: Math.round(Style.marginM * notifWindow.notifScale)
+                spacing: Math.round(Style.marginS * notifWindow.notifScale)
 
                 NImageRounded {
-                  Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio)
-                  Layout.preferredHeight: Math.round(24 * Style.uiScaleRatio)
+                  Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio * notifWindow.notifScale)
+                  Layout.preferredHeight: Math.round(24 * Style.uiScaleRatio * notifWindow.notifScale)
                   Layout.alignment: Qt.AlignVCenter
                   radius: Style.radiusXS
                   imagePath: model.originalImage || ""
                   borderColor: "transparent"
                   borderWidth: 0
                   fallbackIcon: "bell"
-                  fallbackIconSize: 16
+                  fallbackIconSize: Math.round(16 * notifWindow.notifScale)
                 }
 
                 ColumnLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginXS
+                  spacing: Math.round(Style.marginXS * notifWindow.notifScale)
 
                   NText {
                     text: model.summary || I18n.tr("common.no-summary")
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeM * notifWindow.notifScale
                     font.weight: Style.fontWeightMedium
                     color: Color.mOnSurface
                     textFormat: Text.StyledText
@@ -794,7 +795,7 @@ Variants {
                     visible: model.body && model.body.length > 0
                     Layout.fillWidth: true
                     text: model.body || ""
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeS * notifWindow.notifScale
                     color: Color.mOnSurfaceVariant
                     textFormat: Text.StyledText
                     wrapMode: Text.Wrap

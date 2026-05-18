@@ -27,6 +27,20 @@ ColumnLayout {
     spacing: Style.marginL
     enabled: Settings.data.notifications.enabled
 
+    NValueSlider {
+      Layout.fillWidth: true
+      label: "Scale"
+      description: "Adjust the size of notification popups only."
+      from: 0.5
+      to: 3
+      stepSize: 0.05
+      showReset: true
+      value: Settings.data.notifications.scale || 1
+      onMoved: value => Settings.data.notifications.scale = value
+      text: Math.round((Settings.data.notifications.scale || 1) * 100) + "%"
+      defaultValue: Settings.getDefaultValue("notifications.scale")
+    }
+
     NComboBox {
       label: I18n.tr("panels.notifications.settings-density-label")
       description: I18n.tr("panels.notifications.settings-density-description")
