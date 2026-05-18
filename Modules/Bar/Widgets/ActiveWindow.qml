@@ -56,7 +56,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
   readonly property bool hasFocusedWindow: CompositorService.getFocusedWindow() !== null
-  readonly property string windowTitle: CompositorService.getFocusedWindowTitle() || "No active window"
+  readonly property string windowTitle: CompositorService.getFocusedWindowTitle()
   readonly property string fallbackIcon: "user-desktop"
 
   readonly property int iconSize: Style.toOdd(capsuleHeight * 0.75)
@@ -74,13 +74,6 @@ Item {
     NumberAnimation {
       duration: Style.animationNormal
       easing.type: Easing.OutCubic
-    }
-  }
-
-  Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
     }
   }
 
@@ -206,14 +199,6 @@ Item {
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
-
-    // Smooth width transition
-    Behavior on width {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutCubic
-      }
-    }
 
     Item {
       id: mainContainer
