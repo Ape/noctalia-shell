@@ -175,6 +175,9 @@ Singleton {
                                                                                        }
 
                                                                                        if (node.isSink) {
+                                                                                         if (name === "easyeffects_sink") {
+                                                                                           return acc;
+                                                                                         }
                                                                                          acc.sinks.push(node);
                                                                                        } else if (node.audio) {
                                                                                          acc.sources.push(node);
