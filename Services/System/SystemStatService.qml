@@ -32,7 +32,7 @@ Singleton {
   readonly property int cpuUsageIntervalMs: 1000
   readonly property int cpuFreqIntervalMs: 3000
   readonly property int memIntervalMs: 5000
-  readonly property int networkIntervalMs: 3000
+  readonly property int networkIntervalMs: 1000
   readonly property int loadAvgIntervalMs: 10000
   readonly property int diskIntervalMs: 30000
   readonly property int gpuIntervalMs: 5000
