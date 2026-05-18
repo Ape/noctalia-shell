@@ -35,7 +35,7 @@ Singleton {
   readonly property int networkIntervalMs: 1000
   readonly property int loadAvgIntervalMs: 10000
   readonly property int diskIntervalMs: 30000
-  readonly property int gpuIntervalMs: 5000
+  readonly property int gpuIntervalMs: 2000
 
   // Public values
   property real cpuUsage: 0
