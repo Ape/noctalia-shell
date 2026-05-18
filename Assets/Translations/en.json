@@ -1908,6 +1908,7 @@
     "disk": "Disk",
     "download-speed": "Download speed",
     "gpu-temp": "GPU temp",
+    "gpu-usage": "GPU usage",
     "load-average": "Load average",
     "title": "System Monitor",
     "upload-speed": "Upload speed"

@@ -324,13 +324,13 @@ SmartPanel {
             }
 
             NText {
-              text: I18n.tr("system-monitor.gpu-temp") + ":"
+              text: (SystemStatService.gpuUsageAvailable ? I18n.tr("system-monitor.gpu-usage") : I18n.tr("system-monitor.gpu-temp")) + ":"
               pointSize: Style.fontSizeXS
               color: Color.mOnSurfaceVariant
             }
 
             NText {
-              text: `${Math.round(SystemStatService.gpuTemp)}°C`
+              text: SystemStatService.gpuUsageAvailable ? `${Math.round(SystemStatService.gpuUsage)}% • ${Math.round(SystemStatService.gpuTemp)}°C` : `${Math.round(SystemStatService.gpuTemp)}°C`
               pointSize: Style.fontSizeXS
               color: Color.mOnSurface
               Layout.fillWidth: true

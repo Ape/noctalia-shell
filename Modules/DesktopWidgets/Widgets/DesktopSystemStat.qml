@@ -46,8 +46,14 @@ DraggableDesktopWidget {
       return [
             {
               icon: "gpu-temperature",
-              text: Math.round(SystemStatService.gpuTemp) + "°C",
+              text: SystemStatService.gpuUsageAvailable ? Math.round(SystemStatService.gpuUsage) + "%" : Math.round(SystemStatService.gpuTemp) + "°C",
               color: root.color
+            },
+            {
+              icon: "cpu-temperature",
+              text: Math.round(SystemStatService.gpuTemp) + "°C",
+              color: root.color2,
+              opacity: SystemStatService.gpuUsageAvailable ? 0.8 : 0.0
             }
           ];
     case "Memory":
@@ -99,7 +105,7 @@ DraggableDesktopWidget {
     case "CPU":
       return SystemStatService.cpuHistory;
     case "GPU":
-      return SystemStatService.gpuTempHistory;
+      return SystemStatService.gpuUsageAvailable ? SystemStatService.gpuUsageHistory : SystemStatService.gpuTempHistory;
     case "Memory":
       return SystemStatService.memHistory;
     case "Disk":
@@ -116,6 +122,8 @@ DraggableDesktopWidget {
     switch (root.statType) {
     case "CPU":
       return SystemStatService.cpuTempHistory;
+    case "GPU":
+      return SystemStatService.gpuUsageAvailable ? SystemStatService.gpuTempHistory : [];
     case "Network":
       return SystemStatService.txSpeedHistory;
     default:
@@ -124,7 +132,7 @@ DraggableDesktopWidget {
   }
 
   // Graph min/max values
-  readonly property real graphMinValue: root.statType === "GPU" ? Math.max(SystemStatService.gpuTempHistoryMin - 5, 0) : 0
+  readonly property real graphMinValue: root.statType === "GPU" ? (SystemStatService.gpuUsageAvailable ? 0 : Math.max(SystemStatService.gpuTempHistoryMin - 5, 0)) : 0
   readonly property real graphMaxValue: {
     switch (root.statType) {
     case "CPU":
@@ -132,7 +140,7 @@ DraggableDesktopWidget {
     case "Disk":
       return 100;  // Percentage-based stats use fixed 0-100 range
     case "GPU":
-      return Math.max(SystemStatService.gpuTempHistoryMax + 5, 1);
+      return SystemStatService.gpuUsageAvailable ? 100 : Math.max(SystemStatService.gpuTempHistoryMax + 5, 1);
     case "Network":
       return SystemStatService.rxMaxSpeed;
     default:
@@ -151,6 +159,8 @@ DraggableDesktopWidget {
     switch (root.statType) {
     case "CPU":
       return Math.max(SystemStatService.cpuTempHistoryMax + 5, 1);
+    case "GPU":
+      return SystemStatService.gpuUsageAvailable ? Math.max(SystemStatService.gpuTempHistoryMax + 5, 1) : graphMaxValue;
     case "Network":
       return SystemStatService.txMaxSpeed;
     default:

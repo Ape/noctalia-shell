@@ -45,6 +45,8 @@ Singleton {
   property real cpuFreqRatio: 0
   property real cpuGlobalMaxFreq: 3.5
   property real gpuTemp: 0
+  property real gpuUsage: 0
+  property bool gpuUsageAvailable: false
   property bool gpuAvailable: false
   property string gpuType: "" // "amd", "intel", "nvidia"
   property real memGb: 0
@@ -80,6 +82,7 @@ Singleton {
 
   property var cpuHistory: new Array(cpuHistoryLength).fill(0)
   property var cpuTempHistory: new Array(cpuHistoryLength).fill(40)  // Reasonable default temp
+  property var gpuUsageHistory: new Array(gpuHistoryLength).fill(0)
   property var gpuTempHistory: new Array(gpuHistoryLength).fill(40)  // Reasonable default temp
   property var memHistory: new Array(memHistoryLength).fill(0)
   property var diskHistories: ({}) // Keyed by mount path, initialized on first update
@@ -120,6 +123,12 @@ Singleton {
   }
 
   function pushGpuHistory() {
+    let usageHistory = gpuUsageHistory.slice();
+    usageHistory.push(gpuUsage);
+    if (usageHistory.length > gpuHistoryLength)
+      usageHistory.shift();
+    gpuUsageHistory = usageHistory;
+
     if (gpuTemp > 0) {
       if (gpuTemp < gpuTempHistoryMin)
         gpuTempHistoryMin = gpuTemp;
@@ -208,8 +217,8 @@ Singleton {
   readonly property bool cpuCritical: cpuUsage >= cpuCriticalThreshold
   readonly property bool tempWarning: cpuTemp >= tempWarningThreshold
   readonly property bool tempCritical: cpuTemp >= tempCriticalThreshold
-  readonly property bool gpuWarning: gpuAvailable && gpuTemp >= gpuWarningThreshold
-  readonly property bool gpuCritical: gpuAvailable && gpuTemp >= gpuCriticalThreshold
+  readonly property bool gpuWarning: gpuAvailable && (gpuUsageAvailable ? (gpuUsage >= gpuWarningThreshold) : (gpuTemp >= gpuWarningThreshold))
+  readonly property bool gpuCritical: gpuAvailable && (gpuUsageAvailable ? (gpuUsage >= gpuCriticalThreshold) : (gpuTemp >= gpuCriticalThreshold))
   readonly property bool memWarning: memPercent >= memWarningThreshold
   readonly property bool memCritical: memPercent >= memCriticalThreshold
   readonly property bool swapWarning: swapPercent >= swapWarningThreshold
@@ -339,6 +348,8 @@ Singleton {
     root.gpuType = "";
     root.gpuTempHwmonPath = "";
     root.gpuTemp = 0;
+    root.gpuUsage = 0;
+    root.gpuUsageAvailable = false;
     root.foundGpuSensors = [];
     root.gpuVramCheckIndex = 0;
 
@@ -957,15 +968,25 @@ Singleton {
   // #4 - Read GPU temperature via nvidia-smi (NVIDIA only)
   Process {
     id: nvidiaTempProcess
-    command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"]
+    command: ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu", "--format=csv,noheader,nounits"]
     running: false
     stdout: StdioCollector {
       onStreamFinished: {
-        const temp = parseInt(text.trim());
+        const raw = text.trim();
+        const firstLine = raw.split('\n')[0] || "";
+        const parts = firstLine.split(",");
+        const temp = parseInt((parts[0] || "").trim());
+        const usage = parseInt((parts[1] || "").trim());
         if (!isNaN(temp)) {
           root.gpuTemp = temp;
-          root.pushGpuHistory();
         }
+        if (!isNaN(usage)) {
+          root.gpuUsage = usage;
+          root.gpuUsageAvailable = true;
+        } else {
+          root.gpuUsageAvailable = false;
+        }
+        root.pushGpuHistory();
       }
     }
   }
@@ -1423,39 +1444,31 @@ Singleton {
     }
 
     let best = null;
+    let bestPriority = -1;
 
     for (var i = 0; i < root.foundGpuSensors.length; i++) {
       const gpu = root.foundGpuSensors[i];
+      let priority = -1;
 
-      // NVIDIA is always highest priority (always discrete) - skip if dGPU monitoring disabled
       if (gpu.type === "nvidia") {
         if (dgpuEnabled) {
-          best = gpu;
-          break;
+          priority = 4;
         }
-        continue;
-      }
-
-      // AMD dGPU is second priority - skip if dGPU monitoring disabled (preserves D3cold power state)
-      if (gpu.type === "amd" && gpu.hasDedicatedVram) {
+      } else if (gpu.type === "amd" && gpu.hasDedicatedVram) {
         if (dgpuEnabled) {
-          best = gpu;
-          break;
+          priority = 3;
         }
-        continue;
-      }
-
-      // Intel Arc is third priority (always discrete) - skip if dGPU monitoring disabled
-      if (gpu.type === "intel" && !best) {
+      } else if (gpu.type === "intel") {
         if (dgpuEnabled) {
-          best = gpu;
+          priority = 2;
         }
-        continue;
+      } else if (gpu.type === "amd" && !gpu.hasDedicatedVram) {
+        priority = 1;
       }
 
-      // AMD iGPU is lowest priority (fallback) - always allowed (no D3cold issue)
-      if (gpu.type === "amd" && !gpu.hasDedicatedVram && !best) {
+      if (priority > bestPriority) {
         best = gpu;
+        bestPriority = priority;
       }
     }
 

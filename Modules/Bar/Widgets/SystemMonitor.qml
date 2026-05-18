@@ -107,6 +107,9 @@ Item {
 
     // GPU (if available)
     if (SystemStatService.gpuAvailable) {
+      if (SystemStatService.gpuUsageAvailable) {
+        rows.push([I18n.tr("system-monitor.gpu-usage"), `${Math.round(SystemStatService.gpuUsage)}%`]);
+      }
       rows.push([I18n.tr("system-monitor.gpu-temp"), `${Math.round(SystemStatService.gpuTemp)}°C`]);
     }
 
@@ -478,7 +481,7 @@ Item {
           // Text mode
           NText {
             visible: !compactMode
-            text: `${Math.round(SystemStatService.gpuTemp)}°`.padStart(paddingTemp, " ")
+            text: (SystemStatService.gpuUsageAvailable ? `${Math.round(SystemStatService.gpuUsage)}%` : `${Math.round(SystemStatService.gpuTemp)}°`).padStart(SystemStatService.gpuUsageAvailable ? paddingPercent : paddingTemp, " ")
             family: fontFamily
             pointSize: barFontSize
             applyUiScale: false
@@ -500,7 +503,7 @@ Item {
             Layout.column: 1
 
             onLoaded: {
-              item.ratio = Qt.binding(() => SystemStatService.gpuTemp / 100);
+              item.ratio = Qt.binding(() => SystemStatService.gpuUsageAvailable ? (SystemStatService.gpuUsage / 100) : (SystemStatService.gpuTemp / 100));
               item.fillColor = Qt.binding(() => SystemStatService.gpuColor);
             }
           }
