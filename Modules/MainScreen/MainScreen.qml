@@ -448,6 +448,28 @@ PanelWindow {
       readonly property bool autoHide: Settings.getBarDisplayModeForScreen(screen?.name) === "auto_hide"
       property bool isHidden: autoHide
 
+      function syncHiddenStateFromSettings() {
+        const screenName = barPlaceholder.screen?.name;
+        if (!screenName) {
+          barPlaceholder.isHidden = barPlaceholder.autoHide;
+          return;
+        }
+
+        barPlaceholder.isHidden = barPlaceholder.autoHide ? BarService.getOrCreateAutoHideState(screenName).hidden : false;
+      }
+
+      Component.onCompleted: {
+        syncHiddenStateFromSettings();
+      }
+
+      onAutoHideChanged: {
+        syncHiddenStateFromSettings();
+      }
+
+      onScreenChanged: {
+        syncHiddenStateFromSettings();
+      }
+
       Connections {
         target: BarService
         function onBarAutoHideStateChanged(screenName, hidden) {

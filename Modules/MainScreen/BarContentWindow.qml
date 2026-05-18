@@ -27,6 +27,7 @@ PanelWindow {
 
   Component.onCompleted: {
     Logger.d("BarContentWindow", "Bar content window created for screen:", barWindow.screen?.name);
+    syncHiddenStateFromSettings();
     if (!isHidden)
       contentLoaded = true;
   }
@@ -51,6 +52,16 @@ PanelWindow {
   readonly property int hideDelay: Settings.data.bar.autoHideDelay || 500
   readonly property int showDelay: Settings.data.bar.autoShowDelay || 100
   property bool isHidden: autoHide
+
+  function syncHiddenStateFromSettings() {
+    const screenName = barWindow.screen?.name;
+    if (!screenName) {
+      barWindow.isHidden = barWindow.autoHide;
+      return;
+    }
+
+    barWindow.isHidden = barWindow.autoHide ? BarService.getOrCreateAutoHideState(screenName).hidden : false;
+  }
 
   // Hover tracking
   property bool barHovered: false
@@ -131,13 +142,13 @@ PanelWindow {
 
   // React to displayMode changes
   onAutoHideChanged: {
-    if (!autoHide) {
-      // Show bar when auto-hide is disabled
-      hideTimer.stop();
-      showTimer.stop();
-      barWindow.isHidden = false;
-    }
-    // When auto-hide is enabled, don't immediately hide - wait for mouse to leave
+    hideTimer.stop();
+    showTimer.stop();
+    syncHiddenStateFromSettings();
+  }
+
+  onScreenChanged: {
+    syncHiddenStateFromSettings();
   }
 
   // Anchor to the bar's edge
