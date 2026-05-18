@@ -1248,20 +1248,9 @@ Singleton {
   // -------------------------------------------------------
   // Helper function to format network speeds
   function formatSpeed(bytesPerSecond) {
-    const units = ["KB", "MB", "GB"];
-    let value = bytesPerSecond / 1000;
-    let unitIndex = 0;
-
-    while (value >= 1000 && unitIndex < units.length - 1) {
-      value /= 1000;
-      unitIndex++;
-    }
-
-    const unit = units[unitIndex];
-    const shortUnit = unit[0];
+    const value = Math.max(0, bytesPerSecond || 0) / 1000000;
     const numStr = value < 10 ? value.toFixed(1) : Math.round(value).toString();
-
-    return (numStr + unit).length > 5 ? numStr + shortUnit : numStr + unit;
+    return numStr + "MB/s";
   }
 
   // -------------------------------------------------------
