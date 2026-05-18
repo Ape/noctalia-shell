@@ -239,6 +239,8 @@ Singleton {
   readonly property color gpuColor: gpuCritical ? criticalColor : (gpuWarning ? warningColor : Color.mPrimary)
   readonly property color memColor: memCritical ? criticalColor : (memWarning ? warningColor : Color.mPrimary)
   readonly property color swapColor: swapCritical ? criticalColor : (swapWarning ? warningColor : Color.mPrimary)
+  readonly property real networkLowSpeedThreshold: 200000   // 0.2 MB/s
+  readonly property real networkHighSpeedThreshold: 10000000 // 10.0 MB/s
 
   function getCoreUsageColor(usage) {
     if (usage >= cpuCriticalThreshold)
@@ -246,6 +248,15 @@ Singleton {
     if (usage >= cpuWarningThreshold)
       return warningColor;
     return Color.mPrimary;
+  }
+
+  function getNetworkSpeedColor(bytesPerSecond, defaultColor = Color.mOnSurface) {
+    const speed = Math.max(0, bytesPerSecond || 0);
+    if (speed >= networkHighSpeedThreshold)
+      return criticalColor;
+    if (speed >= networkLowSpeedThreshold)
+      return warningColor;
+    return defaultColor;
   }
 
   function getDiskColor(diskPath, available = false) {

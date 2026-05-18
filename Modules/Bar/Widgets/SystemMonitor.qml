@@ -751,7 +751,7 @@ Item {
               applyUiScale: false
               x: Style.pixelAlignCenter(parent.width, width)
               y: Style.pixelAlignCenter(parent.height, contentHeight)
-              color: root.iconColor
+              color: SystemStatService.getNetworkSpeedColor(SystemStatService.rxSpeed, root.iconColor)
             }
           }
 
@@ -765,7 +765,7 @@ Item {
             Layout.alignment: Qt.AlignCenter
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: root.textColor
+            color: SystemStatService.getNetworkSpeedColor(SystemStatService.rxSpeed, root.textColor)
             Layout.row: isVertical ? 0 : 0
             Layout.column: isVertical ? 0 : 1
           }
@@ -817,7 +817,7 @@ Item {
               applyUiScale: false
               x: Style.pixelAlignCenter(parent.width, width)
               y: Style.pixelAlignCenter(parent.height, contentHeight)
-              color: root.iconColor
+              color: SystemStatService.getNetworkSpeedColor(SystemStatService.txSpeed, root.iconColor)
             }
           }
 
@@ -831,7 +831,7 @@ Item {
             Layout.alignment: Qt.AlignCenter
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: root.textColor
+            color: SystemStatService.getNetworkSpeedColor(SystemStatService.txSpeed, root.textColor)
             Layout.row: isVertical ? 0 : 0
             Layout.column: isVertical ? 0 : 1
           }
