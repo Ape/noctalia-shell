@@ -54,7 +54,7 @@ const std::unordered_map<std::string, std::string_view> kAliases = {
 
     // Volume
     {"volume-high", "volume"},
-    {"volume-low", "volume-2"},
+    {"volume-low", "volume"},
     {"volume-mute", "volume-off"},
     {"volume-x", "volume-3"},
     {"volume-zero", "volume-3"},
