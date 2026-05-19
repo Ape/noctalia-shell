@@ -47,16 +47,7 @@ namespace FormatUnits {
   std::string formatDecimalBytesAsGb(double bytes) { return std::format("{:.1f} GB", bytes / kBytesPerGb); }
 
   std::string formatDecimalBytesPerSecond(double bytesPerSec) {
-    if (bytesPerSec >= kBytesPerGb) {
-      return std::format("{:.1f} GB/s", bytesPerSec / kBytesPerGb);
-    }
-    if (bytesPerSec >= kBytesPerMb) {
-      return std::format("{:.1f} MB/s", bytesPerSec / kBytesPerMb);
-    }
-    if (bytesPerSec >= kBytesPerKb) {
-      return std::format("{:.1f} kB/s", bytesPerSec / kBytesPerKb);
-    }
-    return std::format("{:.0f} B/s", bytesPerSec);
+    return std::format("{:.1f}M", bytesPerSec / kBytesPerMb);
   }
 
 } // namespace FormatUnits
