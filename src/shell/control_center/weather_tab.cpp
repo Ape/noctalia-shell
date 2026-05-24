@@ -251,8 +251,6 @@ std::unique_ptr<Flex> WeatherTab::create() {
   addDetailRow("wind", i18n::tr("control-center.weather.details.wind"), m_windLabel);
   addDetailRow("weather-sunrise", i18n::tr("control-center.weather.details.sunrise"), m_sunriseLabel);
   addDetailRow("weather-sunset", i18n::tr("control-center.weather.details.sunset"), m_sunsetLabel);
-  addDetailRow("mountain", i18n::tr("control-center.weather.details.elevation"), m_elevationLabel);
-  addDetailRow("clock", i18n::tr("control-center.weather.details.timezone"), m_timeZoneLabel);
 
   leftColumn->addChild(std::move(detailsCard));
 
