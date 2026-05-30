@@ -592,7 +592,7 @@ void WorkspacesWidget::applyItemLayout(std::size_t i) {
       const float itemH = m_isVertical ? it.currentWidth : m_indicatorHeight;
       // Box-center the (text-only) label, unrounded: the renderer snaps the glyph
       // quad to the pixel grid, so rounding here would double-round the baseline.
-      const float textX = (itemW - it.text->width()) * 0.5f;
+      const float textX = (itemW - it.text->width()) * 0.5f - 0.5f;
       const float textY = (itemH - it.text->height()) * 0.5f;
       it.text->setPosition(std::max(0.0f, textX), textY);
     }
