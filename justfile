@@ -21,26 +21,14 @@ configure m=mode install_prefix=prefix:
     fi
     ln -sfn "build-{{m}}/compile_commands.json" compile_commands.json
 
-build m=mode: (_ensure-configured m)
+build m=mode: (configure m)
     meson compile -C build-{{m}}
-
-_ensure-configured m=mode:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [[ ! -f "build-{{m}}/build.ninja" ]]; then
-        just configure {{m}}
-        exit 0
-    fi
-    current_cpp_std="$(meson configure "build-{{m}}" | awk '$1 == "cpp_std" { print $2; found=1 } END { if (!found) exit 1 }')"
-    if [[ "$current_cpp_std" != "{{cpp-std}}" ]]; then
-        meson configure "build-{{m}}" -Dcpp_std={{cpp-std}}
-    fi
 
 run m=mode: (build m)
     ./build-{{m}}/noctalia
 
 # Build (forcing tests on, even for release) and run the unit tests.
-test m=mode *args: (_ensure-configured m)
+test m=mode *args: (configure m)
     #!/usr/bin/env bash
     set -euo pipefail
     # Plain reconfigure first so build dirs predating the 'tests' option learn it,
@@ -90,10 +78,10 @@ _clang_tidy m=mode *args:
     # ../src/ also excludes vendored third_party/*/src/* headers.
     run-clang-tidy -quiet -use-color -p "$cdb_dir" -j "$(nproc)" -header-filter='\.\./src/.*' {{args}} "^${src_root}/.*"
 
-lint m=mode: (_ensure-configured m)
+lint m=mode: (configure m)
     just _clang_tidy {{m}} '-warnings-as-errors=*'
 
-fix m=mode: (_ensure-configured m)
+fix m=mode: (configure m)
     just _clang_tidy {{m}} -fix
     just format
 
