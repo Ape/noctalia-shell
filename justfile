@@ -21,26 +21,14 @@ configure m=mode install_prefix=prefix:
     fi
     ln -sfn "build-{{m}}/compile_commands.json" compile_commands.json
 
-build m=mode: (_ensure-configured m)
+build m=mode: (configure m)
     meson compile -C build-{{m}}
-
-_ensure-configured m=mode:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [[ ! -f "build-{{m}}/build.ninja" ]]; then
-        just configure {{m}}
-        exit 0
-    fi
-    current_cpp_std="$(meson configure "build-{{m}}" | awk '$1 == "cpp_std" { print $2; exit }')"
-    if [[ "$current_cpp_std" != "{{cpp-std}}" ]]; then
-        meson configure "build-{{m}}" -Dcpp_std={{cpp-std}}
-    fi
 
 run m=mode: (build m)
     ./build-{{m}}/noctalia
 
 # Build (forcing tests on, even for release) and run the unit tests.
-test m=mode *args: (_ensure-configured m)
+test m=mode *args: (configure m)
     #!/usr/bin/env bash
     set -euo pipefail
     # Plain reconfigure first so build dirs predating the 'tests' option learn it,
