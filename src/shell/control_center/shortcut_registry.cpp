@@ -15,6 +15,7 @@
 #include "scripting/plugin_registry.h"
 #include "scripting/plugin_runtime_context.h"
 #include "shell/bar/widgets/keyboard_layout_widget.h"
+#include "shell/bar/widgets/mouse_accel_profile_widget.h"
 #include "shell/control_center/plugin_shortcut.h"
 #include "shell/control_center/shortcut_services.h"
 #include "shell/panel/panel_manager.h"
@@ -31,7 +32,7 @@
 
 namespace {
 
-  constexpr std::array<ShortcutRegistry::CatalogEntry, 17> kShortcutCatalog{{
+  constexpr std::array<ShortcutRegistry::CatalogEntry, 18> kShortcutCatalog{{
       {"wifi", "control-center.shortcuts.wifi"},
       {"bluetooth", "control-center.shortcuts.bluetooth"},
       {"nightlight", "control-center.shortcuts.nightlight"},
@@ -46,6 +47,7 @@ namespace {
       {"system", "control-center.shortcuts.system"},
       {"screen_time", "control-center.shortcuts.screen-time"},
       {"keyboard_layout", "control-center.shortcuts.keyboard-layout"},
+      {"mouse_accel_profile", "control-center.shortcuts.mouse-accel-profile"},
       {"wallpaper", "control-center.shortcuts.wallpaper"},
       {"session", "control-center.shortcuts.session"},
       {"clipboard", "control-center.shortcuts.clipboard"},
@@ -442,6 +444,37 @@ namespace {
     ConfigService* m_config = nullptr;
   };
 
+  class MouseAccelProfileShortcut final : public Shortcut {
+  public:
+    explicit MouseAccelProfileShortcut(CompositorPlatform* platform) : m_platform(platform) {}
+    std::string_view id() const override { return "mouse_accel_profile"; }
+    std::string defaultLabel() const override { return i18n::tr("control-center.shortcuts.mouse-accel-profile"); }
+    std::string displayLabel() const override {
+      const auto profile = m_platform != nullptr ? m_platform->currentMouseAccelProfile() : std::nullopt;
+      if (!profile.has_value()) {
+        return defaultLabel();
+      }
+      return MouseAccelProfileWidget::formatProfileLabel(*profile);
+    }
+    std::string_view iconOn() const override { return "mouse"; }
+    std::string_view iconOff() const override { return "mouse"; }
+    bool isToggle() const override { return true; }
+    bool enabled() const override { return m_platform != nullptr && m_platform->hasMouseAccelBackend(); }
+    bool active() const override {
+      const auto profile = m_platform != nullptr ? m_platform->currentMouseAccelProfile() : std::nullopt;
+      return profile == MouseAccelProfile::Flat;
+    }
+    void onClick() override {
+      if (m_platform != nullptr) {
+        (void)m_platform->cycleMouseAccelProfile();
+      }
+      PanelManager::instance().refresh();
+    }
+
+  private:
+    CompositorPlatform* m_platform = nullptr;
+  };
+
   // ── Action-only shortcuts ────��──────────────────────────────────────────────
 
   class MediaShortcut final : public Shortcut {
@@ -606,6 +639,8 @@ std::unique_ptr<Shortcut> ShortcutRegistry::create(std::string_view type, const 
   }
   if (type == "keyboard_layout")
     return std::make_unique<KeyboardLayoutShortcut>(s.platform, s.config);
+  if (type == "mouse_accel_profile")
+    return std::make_unique<MouseAccelProfileShortcut>(s.platform);
   if (type == "wallpaper")
     return std::make_unique<WallpaperShortcut>();
   if (type == "session")

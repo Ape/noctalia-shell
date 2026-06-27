@@ -114,8 +114,8 @@ namespace {
     (void)resolveWidgetContentScale(1.0f, &widget, "widget." + std::string(widgetName) + ".scale");
   }
 
-  void validateKeyboardLayoutWidgetSettings(std::string_view widgetName, const WidgetConfig& widget) {
-    if (widget.type != "keyboard_layout") {
+  void validateIconLabelWidgetSettings(std::string_view widgetName, const WidgetConfig& widget) {
+    if (widget.type != "keyboard_layout" && widget.type != "mouse_accel_profile") {
       return;
     }
 
@@ -129,7 +129,7 @@ namespace {
   void validateWidgetSettings(std::string_view widgetName, const WidgetConfig& widget) {
     validateWidgetColorSettings(widgetName, widget);
     validateWidgetScaleSetting(widgetName, widget);
-    validateKeyboardLayoutWidgetSettings(widgetName, widget);
+    validateIconLabelWidgetSettings(widgetName, widget);
   }
 
   void validateDesktopWidgetColorSettings(const DesktopWidgetState& widget, std::string_view section) {

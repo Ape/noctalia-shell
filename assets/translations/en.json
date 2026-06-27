@@ -115,6 +115,13 @@
       }
     }
   },
+  "mouse": {
+    "accel-profiles": {
+      "adaptive": "Adaptive",
+      "flat": "Flat",
+      "unknown": "Unknown"
+    }
+  },
   "clipboard": {
     "actions": {
       "clear-all": "Clear everything",
@@ -317,6 +324,7 @@
       "keyboard-layout": "Layout",
       "media": "Media",
       "mic-mute": "Microphone",
+      "mouse-accel-profile": "Mouse",
       "nightlight": "Night Light",
       "nightlight-states": {
         "forced": "Always on",
@@ -3123,6 +3131,7 @@
         "launcher": "Launcher",
         "lock-keys": "Lock Keys",
         "media": "Media",
+        "mouse-accel-profile": "Mouse Acceleration Profile",
         "network": "Network",
         "nightlight": "Night Light",
         "notifications": "Notifications",

@@ -100,6 +100,13 @@ namespace noctalia::config {
     keyboardLayout.settings["hide_when_single_layout"] = false;
     seed("keyboard_layout", std::move(keyboardLayout));
 
+    WidgetConfig mouseAccelProfile;
+    mouseAccelProfile.type = "mouse_accel_profile";
+    mouseAccelProfile.settings["show_icon"] = true;
+    mouseAccelProfile.settings["show_label"] = true;
+    mouseAccelProfile.settings["glyph"] = std::string("mouse");
+    seed("mouse_accel_profile", std::move(mouseAccelProfile));
+
     WidgetConfig lockKeys;
     lockKeys.type = "lock_keys";
     lockKeys.settings["show_caps_lock"] = true;

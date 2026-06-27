@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compositors/keyboard_backend.h"
+#include "compositors/mouse_accel_backend.h"
 #include "compositors/workspace_backend.h"
 #include "wayland/wayland_connection.h"
 
@@ -143,6 +144,11 @@ public:
   void addKeyboardLayoutPollFds(std::vector<pollfd>& fds) const;
   void dispatchKeyboardLayoutPoll(const std::vector<pollfd>& fds, std::size_t startIdx);
 
+  [[nodiscard]] bool hasMouseAccelBackend() const noexcept;
+  [[nodiscard]] std::optional<MouseAccelProfile> currentMouseAccelProfile() const;
+  [[nodiscard]] bool setMouseAccelProfile(MouseAccelProfile profile) const;
+  [[nodiscard]] bool cycleMouseAccelProfile() const;
+
   [[nodiscard]] bool requestSessionExit() const;
   [[nodiscard]] bool setOutputPower(bool on) const;
 
@@ -181,6 +187,7 @@ private:
   std::unique_ptr<compositors::OutputPowerBackend> m_outputPowerBackend;
   mutable std::optional<bool> m_lastRequestedOutputPowerState;
   std::unique_ptr<KeyboardLayoutBackend> m_keyboardLayoutBackend;
+  std::unique_ptr<MouseAccelBackend> m_mouseAccelBackend;
   ChangeCallback m_workspaceChangeCallback;
   ChangeCallback m_overviewChangeCallback;
   ChangeCallback m_keyboardLayoutChangeCallback;

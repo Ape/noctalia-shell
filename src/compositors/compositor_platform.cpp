@@ -4,6 +4,7 @@
 #include "compositors/compositor_runtime.h"
 #include "compositors/ext_workspace/ext_workspace_output_backend.h"
 #include "compositors/hyprland/hyprland_keyboard_backend.h"
+#include "compositors/hyprland/hyprland_mouse_accel_backend.h"
 #include "compositors/hyprland/hyprland_output_backend.h"
 #include "compositors/hyprland/hyprland_runtime.h"
 #include "compositors/hyprland/hyprland_toplevel_mapping.h"
@@ -245,6 +246,23 @@ namespace {
     BackendT m_backend;
   };
 
+  template <typename BackendT> class MouseAccelBackendAdapter final : public MouseAccelBackend {
+  public:
+    MouseAccelBackendAdapter() = default;
+
+    template <typename... Args>
+    explicit MouseAccelBackendAdapter(Args&&... args) : m_backend(std::forward<Args>(args)...) {}
+
+    [[nodiscard]] bool isAvailable() const noexcept override { return m_backend.isAvailable(); }
+    [[nodiscard]] std::optional<MouseAccelProfile> currentProfile() const override {
+      return m_backend.currentProfile();
+    }
+    [[nodiscard]] bool setProfile(MouseAccelProfile profile) const override { return m_backend.setProfile(profile); }
+
+  private:
+    BackendT m_backend;
+  };
+
   class LambdaOutputPowerBackend final : public compositors::OutputPowerBackend {
   public:
     using Callback = std::function<bool(WaylandConnection&, bool)>;
@@ -359,6 +377,24 @@ namespace {
       return std::make_unique<KeyboardLayoutBackendAdapter<SwayKeyboardBackend>>(runtimeRegistry.sway());
     case compositors::CompositorKind::Triad:
       return std::make_unique<KeyboardLayoutBackendAdapter<TriadKeyboardBackend>>(runtimeRegistry.triad());
+    case compositors::CompositorKind::Dwl:
+    case compositors::CompositorKind::Labwc:
+    case compositors::CompositorKind::Kde:
+    case compositors::CompositorKind::Unknown:
+      break;
+    }
+    return nullptr;
+  }
+
+  [[nodiscard]] std::unique_ptr<MouseAccelBackend>
+  createMouseAccelBackend(compositors::CompositorRuntimeRegistry& runtimeRegistry) {
+    switch (compositors::detect()) {
+    case compositors::CompositorKind::Hyprland:
+      return std::make_unique<MouseAccelBackendAdapter<HyprlandMouseAccelBackend>>(runtimeRegistry.hyprland());
+    case compositors::CompositorKind::Niri:
+    case compositors::CompositorKind::Mango:
+    case compositors::CompositorKind::Sway:
+    case compositors::CompositorKind::Triad:
     case compositors::CompositorKind::Dwl:
     case compositors::CompositorKind::Labwc:
     case compositors::CompositorKind::Kde:
@@ -526,6 +562,7 @@ CompositorPlatform::CompositorPlatform(WaylandConnection& wayland)
   }
   m_outputPowerBackend = createOutputPowerBackend(*m_runtimeRegistry);
   m_keyboardLayoutBackend = createKeyboardLayoutBackend(*m_runtimeRegistry);
+  m_mouseAccelBackend = createMouseAccelBackend(*m_runtimeRegistry);
 
   m_workspaces->setOutputNameResolver([this](wl_output* output) { return connectorNameForOutput(output); });
 
@@ -1261,6 +1298,25 @@ void CompositorPlatform::dispatchKeyboardLayoutPoll(const std::vector<pollfd>& f
   if (m_keyboardLayoutBackend != nullptr && m_keyboardLayoutBackend->pollFd() >= 0 && startIdx < fds.size()) {
     m_keyboardLayoutBackend->dispatchPoll(fds[startIdx].revents);
   }
+}
+
+bool CompositorPlatform::hasMouseAccelBackend() const noexcept {
+  return m_mouseAccelBackend != nullptr && m_mouseAccelBackend->isAvailable();
+}
+
+std::optional<MouseAccelProfile> CompositorPlatform::currentMouseAccelProfile() const {
+  if (m_mouseAccelBackend == nullptr) {
+    return std::nullopt;
+  }
+  return m_mouseAccelBackend->currentProfile();
+}
+
+bool CompositorPlatform::setMouseAccelProfile(MouseAccelProfile profile) const {
+  return m_mouseAccelBackend != nullptr && m_mouseAccelBackend->setProfile(profile);
+}
+
+bool CompositorPlatform::cycleMouseAccelProfile() const {
+  return m_mouseAccelBackend != nullptr && m_mouseAccelBackend->cycleProfile();
 }
 
 bool CompositorPlatform::requestSessionExit() const {

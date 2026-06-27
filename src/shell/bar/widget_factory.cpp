@@ -24,6 +24,7 @@
 #include "shell/bar/widgets/launcher_widget.h"
 #include "shell/bar/widgets/lock_keys_widget.h"
 #include "shell/bar/widgets/media_widget.h"
+#include "shell/bar/widgets/mouse_accel_profile_widget.h"
 #include "shell/bar/widgets/network_widget.h"
 #include "shell/bar/widgets/nightlight_widget.h"
 #include "shell/bar/widgets/notification_widget.h"
@@ -282,6 +283,18 @@ std::unique_ptr<Widget> WidgetFactory::create(
         m_platform, cycleCommand, KeyboardLayoutWidget::parseDisplayMode(display), showIcon, showLabel,
         hideWhenSingleLayout, std::move(customLabels), std::move(glyph)
     );
+    widget->setContentScale(contentScale);
+    return widget;
+  }
+
+  if (type == "mouse_accel_profile") {
+    const bool showIcon = wc != nullptr ? wc->getBool("show_icon", true) : true;
+    const bool showLabel = wc != nullptr ? wc->getBool("show_label", true) : true;
+    std::string glyph = wc != nullptr ? wc->getString("glyph", "mouse") : std::string{"mouse"};
+    if (glyph.empty()) {
+      glyph = "mouse";
+    }
+    auto widget = std::make_unique<MouseAccelProfileWidget>(m_platform, showIcon, showLabel, std::move(glyph));
     widget->setContentScale(contentScale);
     return widget;
   }

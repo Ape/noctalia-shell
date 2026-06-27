@@ -1026,7 +1026,7 @@ namespace settings {
         ShortcutListSetting{
             .items = cfg.controlCenter.shortcuts, .suggestedOptions = controlCenterShortcutOptions(), .maxItems = 6
         },
-        "quick settings shortcuts toggles wifi bluetooth caffeine night light dnd power media weather clipboard"
+        "quick settings shortcuts toggles wifi bluetooth caffeine night light dnd power media weather clipboard mouse"
     ));
     entries.push_back(makeEntry(
         SettingsSection::Panels, "launcher", tr("settings.schema.panels.placement-launcher.label"),

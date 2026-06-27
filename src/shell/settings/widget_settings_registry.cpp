@@ -68,6 +68,7 @@ namespace settings {
         {.type = "launcher", .labelKey = "settings.widgets.types.launcher", .glyph = "search"},
         {.type = "lock_keys", .labelKey = "settings.widgets.types.lock-keys", .glyph = "lock"},
         {.type = "media", .labelKey = "settings.widgets.types.media", .glyph = "disc-filled"},
+        {.type = "mouse_accel_profile", .labelKey = "settings.widgets.types.mouse-accel-profile", .glyph = "mouse"},
         {.type = "network", .labelKey = "settings.widgets.types.network", .glyph = "wifi-off"},
         {.type = "nightlight", .labelKey = "settings.widgets.types.nightlight", .glyph = "nightlight-off"},
         {.type = "notifications", .labelKey = "settings.widgets.types.notifications", .glyph = "bell"},
@@ -139,6 +140,9 @@ namespace settings {
       }
       if (type == "keyboard_layout") {
         return nonEmptyGlyph(config->getString("glyph", "keyboard"), "keyboard");
+      }
+      if (type == "mouse_accel_profile") {
+        return nonEmptyGlyph(config->getString("glyph", "mouse"), "mouse");
       }
       if (type == "sysmon") {
         if (const std::string custom = config->getString("glyph", ""); !custom.empty()) {
@@ -700,6 +704,14 @@ namespace settings {
         labels.visibleWhen = WidgetSettingVisibility{"show_label", {"true"}};
         add(std::move(labels));
       }
+    } else if (type == "mouse_accel_profile") {
+      add(boolSpec("show_icon", true));
+      {
+        auto glyph = glyphSpec("glyph", "mouse");
+        glyph.visibleWhen = WidgetSettingVisibility{"show_icon", {"true"}};
+        add(std::move(glyph));
+      }
+      add(boolSpec("show_label", true));
     } else if (type == "launcher") {
       add(glyphSpec("glyph", "search"));
       add(stringSpec("custom_image", ""));

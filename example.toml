@@ -394,6 +394,8 @@ enabled = false
 # [[control_center.shortcuts]]
 # type = "notification"
 # [[control_center.shortcuts]]
+# type = "mouse_accel_profile"
+# [[control_center.shortcuts]]
 # type = "wallpaper"
 # [[control_center.shortcuts]]
 # type = "screen_recorder"
@@ -441,6 +443,11 @@ battery_low_percent_threshold = 0   # set to e.g. 15 to enable battery_under_thr
 # [widget.keyboard_layout.custom_labels]  # override display labels by exact layout name
 # "German (Neo 2)"        = "Neo2"
 # "English (US)"          = "EN"
+
+# [widget.mouse_accel_profile]
+# show_icon  = true
+# show_label = true
+# glyph      = "mouse"
 
 # [widget.lock_button]
 # type                = "custom_button"
